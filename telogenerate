@@ -1,0 +1,61 @@
+import os
+import json
+from telethon.sync import TelegramClient
+from telethon.sessions import StringSession
+
+# Fungsi untuk membuat dan menyimpan StringSession dari file session Telethon ke dalam file JSON
+def convert_and_save_session(file_path, api_id, api_hash, output_folder):
+    try:
+        # Dapatkan nama session dari file (misalnya, "namasession.session")
+        session_name = os.path.splitext(os.path.basename(file_path))[0]
+        
+        # Buka sesi yang ada dalam file session
+        with TelegramClient(file_path, api_id, api_hash) as client:
+            # Buat StringSession dari client yang sudah terhubung
+            string_session = StringSession.save(client.session)
+            print(f"StringSession untuk {file_path}: {string_session}")
+            
+            # Buat dictionary untuk format JSON
+            session_data = {
+                "apiId": api_id,
+                "apiHash": api_hash,
+                "sessionString": string_session
+            }
+
+            # Pastikan folder output ada, jika tidak buat baru
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+
+            # Tentukan path untuk menyimpan file JSON
+            output_file = os.path.join(output_folder, f"{session_name}.session")
+
+            # Simpan dalam file JSON dengan format rapi
+            with open(output_file, "w") as file:
+                json.dump(session_data, file, indent=2)
+            
+            print(f"Session disimpan di: {output_file}")
+    except Exception as e:
+        print(f"Error memproses file session {file_path}: {e}")
+
+# Fungsi utama untuk memproses semua file session dalam folder
+def process_all_sessions(session_folder, api_id, api_hash, output_folder):
+    # Pastikan folder session ada
+    if not os.path.exists(session_folder):
+        print(f"Folder {session_folder} tidak ditemukan.")
+        return
+    
+    # Iterasi semua file dalam folder session
+    for filename in os.listdir(session_folder):
+        if filename.endswith('.session'):
+            file_path = os.path.join(session_folder, filename)
+            # Konversi file session ke StringSession dan simpan ke file JSON di folder output
+            convert_and_save_session(file_path, api_id, api_hash, output_folder)
+
+# Konfigurasi API ID, API Hash, dan folder session
+api_id = 12345678  # Ganti dengan API ID kamu
+api_hash = '123344xxxx'  # Ganti dengan API Hash kamu
+session_folder = 'sessions/'  # Folder tempat file session
+output_folder = 'string/'  # Folder output untuk menyimpan file session dalam format JSON
+
+# Proses semua file session dan simpan hasilnya ke dalam folder /string
+process_all_sessions(session_folder, api_id, api_hash, output_folder)
