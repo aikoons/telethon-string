@@ -1,2 +1,2 @@
 # telethon-string
-telethon to string 
+telethon session to string 
